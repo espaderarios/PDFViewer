@@ -199,8 +199,9 @@ async function handleUpload() {
     formData.append('year', year);
     formData.append('file', file);
 
-    // Upload to local server
-    const response = await fetch('http://localhost:3001/upload', {
+    // Upload to worker endpoint
+    const uploadUrl = API_BASE ? `${API_BASE}/upload` : '/upload';
+    const response = await fetch(uploadUrl, {
       method: 'POST',
       body: formData
     });
@@ -229,7 +230,7 @@ async function handleUpload() {
       uploadStatus.innerHTML = `<p class="error">❌ Upload failed: ${result.error}</p>`;
     }
   } catch (error) {
-    uploadStatus.innerHTML = `<p class="error">❌ Error: ${error.message}<br><br>Make sure the upload server is running: <code>node upload-server.js</code></p>`;
+    uploadStatus.innerHTML = `<p class="error">❌ Error: ${error.message}</p>`;
   } finally {
     uploadBtn.disabled = false;
   }
