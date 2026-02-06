@@ -6,13 +6,15 @@ export default {
     const url = new URL(request.url);
     const path = url.pathname;
 
-    // CORS headers
+    // CORS headers - permissive for safety
     const corsHeaders = {
       'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-      'Access-Control-Allow-Headers': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, PUT, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+      'Access-Control-Max-Age': '86400',
     };
 
+    // Handle preflight requests
     if (request.method === 'OPTIONS') {
       return new Response(null, { 
         status: 204,
@@ -23,16 +25,23 @@ export default {
     try {
       // Route handling
       if (path === '/pdfs/years') {
-        return handleGetYears(env, corsHeaders);
+        const response = await handleGetYears(env, corsHeaders);
+        return response;
       } else if (path.startsWith('/pdfs/year/')) {
         const year = decodeURIComponent(path.split('/').pop());
-        return handleGetPDFsByYear(env, year, corsHeaders);
+        const response = await handleGetPDFsByYear(env, year, corsHeaders);
+        return response;
       } else if (path === '/upload' && request.method === 'POST') {
-        return handleUpload(request, env, corsHeaders);
+        const response = await handleUpload(request, env, corsHeaders);
+        return response;
       }
 
-      return new Response('Not Found', { status: 404, headers: corsHeaders });
+      return new Response(JSON.stringify({ error: 'Not found' }), { 
+        status: 404, 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+      });
     } catch (error) {
+      console.error('Worker error:', error);
       return new Response(JSON.stringify({ error: error.message }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
