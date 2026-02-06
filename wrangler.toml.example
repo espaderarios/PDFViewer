@@ -1,0 +1,34 @@
+// Example wrangler.toml configuration
+// Copy the relevant IDs from your wrangler commands and update this file
+// Then rename to wrangler.toml
+
+name = "pdf-viewer-worker"
+main = "worker.js"
+compatibility_date = "2024-01-01"
+
+# KV Namespace for sessions
+# Create with: wrangler kv:namespace create "SESSIONS"
+[[kv_namespaces]]
+binding = "SESSIONS"
+id = "paste-your-kv-namespace-id-here"  # ← UPDATE THIS
+
+# D1 Database for PDFs and recent views
+# Create with: wrangler d1 create pdf-viewer-db
+[[d1_databases]]
+binding = "DB"
+database_name = "pdf-viewer-db"
+database_id = "paste-your-database-id-here"  # ← UPDATE THIS
+
+# Environment variables - update these URLs
+[vars]
+WORKER_URL = "https://your-worker.workers.dev"  # ← UPDATE THIS (after first deploy, you'll get this URL)
+APP_URL = "https://your-app.pages.dev"  # ← UPDATE THIS (your Cloudflare Pages URL)
+
+# Secrets - DO NOT put actual values here!
+# Set these with wrangler commands:
+# wrangler secret put GOOGLE_CLIENT_ID
+# wrangler secret put GOOGLE_CLIENT_SECRET
+#
+# Get these from: https://console.cloud.google.com/
+# GOOGLE_CLIENT_ID = "set with wrangler secret put"
+# GOOGLE_CLIENT_SECRET = "set with wrangler secret put"

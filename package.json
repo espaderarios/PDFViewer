@@ -1,0 +1,11 @@
+{
+  "dependencies": {
+    "wrangler": "^3.0.0"
+  },
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "db:init": "wrangler d1 execute pdf-viewer-db --file=schema.sql",
+    "pages:deploy": "wrangler pages deploy . --project-name=pdf-viewer"
+  }
+}

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Theme color for address bar (Chrome, Edge, Safari - not supported in Firefox) -->
+  <meta name="theme-color" content="#1e293b">
+  <title>Online PDF Viewer</title>
+  <link rel="icon" href="favicon.png" type="image/png">
+  <link rel="apple-touch-icon" href="favicon.png">
+  <link rel="stylesheet" href="style.css" />
+  <link rel="manifest" href="manifest.json">
+</head>
+<body>
+  <!-- ========== App Section ========== -->
+  <section id="appSection">
+    <header>
+      <h1>Online PDF Viewer</h1>
+    </header>
+
+    <nav>
+      <button id="profileTab">Profile</button>
+      <button id="yearTab">Year</button>
+      <button id="uploadTab">Upload PDF</button>
+    </nav>
+
+    <main>
+      <section id="profileSection" class="tab-section">
+        <h2>Recently Viewed PDFs</h2>
+        <div id="recentList"></div>
+      </section>
+
+      <section id="yearSection" class="tab-section hidden">
+        <div id="yearButtons"></div>
+        <div id="searchContainer" class="hidden">
+          <input type="text" id="searchInput" placeholder="Search PDF title..." />
+        </div>
+        <div id="pdfList"></div>
+      </section>
+
+      <section id="uploadSection" class="tab-section hidden">
+        <h2>Upload PDF</h2>
+        <div class="upload-container">
+          <div class="upload-form">
+            <div class="form-group">
+              <label for="pdfTitle">Title:</label>
+              <input type="text" id="pdfTitle" placeholder="Enter PDF title" required />
+            </div>
+            <div class="form-group">
+              <label for="pdfSubject">Subject:</label>
+              <input type="text" id="pdfSubject" placeholder="Enter subject" required />
+            </div>
+            <div class="form-group">
+              <label for="pdfYear">Year Level:</label>
+              <input type="text" id="pdfYear" placeholder="e.g., Year 7, 3rd Year" required />
+            </div>
+            <div class="form-group">
+              <label for="pdfFile">PDF File:</label>
+              <input type="file" id="pdfFile" accept=".pdf" required />
+            </div>
+            <button id="uploadBtn" class="upload-btn">Upload PDF</button>
+          </div>
+          <div id="uploadStatus" class="upload-status"></div>
+        </div>
+      </section>
+    </main>
+  </section>
+
+  <script type="module" src="script.js"></script>
+  <script>
+    if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+      navigator.serviceWorker.register('/service-worker.js')
+        .then(() => console.log('Service Worker registered'))
+        .catch(err => console.warn('Service Worker registration failed:', err));
+    }
+  </script>
+  <button id="installBtn" type="button">Install App</button>
+
+<script>
+let deferredPrompt;
+const installBtn = document.getElementById('installBtn');
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  installBtn.style.display = 'block';
+});
+
+installBtn.addEventListener('click', async () => {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') {
+      console.log('User accepted the install prompt');
+    }
+    deferredPrompt = null;
+    installBtn.style.display = 'none';
+  }
+});
+</script>
+
+  
+</body>
+</html>
