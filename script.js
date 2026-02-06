@@ -1,4 +1,7 @@
-const API_BASE = 'https://pdf-viewer-worker.espaderarios.workers.dev';
+// Use local API when running on localhost, remote API otherwise
+const API_BASE = window.location.hostname === 'localhost' 
+  ? '' // Use local dev server
+  : 'https://pdf-viewer-worker.espaderarios.workers.dev';
 
 const profileTab = document.getElementById("profileTab");
 const yearTab = document.getElementById("yearTab");
@@ -105,8 +108,17 @@ function handleSearch() {
 
 async function openInMozillaViewer(pdf) {
   const mozillaViewer = "https://mozilla.github.io/pdf.js/web/viewer.html?file=";
-  const pdfUrl = encodeURIComponent(pdf.file_url);
-  window.open(mozillaViewer + pdfUrl, "_blank");
+  
+  // Convert relative URL to absolute URL
+  let pdfUrl = pdf.file_url;
+  if (!pdfUrl.startsWith('http://') && !pdfUrl.startsWith('https://')) {
+    // Create absolute URL using current origin and pathname
+    const basePath = window.location.pathname.replace(/\/$/, ''); // Remove trailing slash
+    pdfUrl = window.location.origin + basePath + pdfUrl;
+  }
+  
+  const encodedUrl = encodeURIComponent(pdfUrl);
+  window.open(mozillaViewer + encodedUrl, "_blank");
 
   // Save to recent views in localStorage
   saveToRecent(pdf);
