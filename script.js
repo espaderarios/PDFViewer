@@ -215,7 +215,8 @@ async function handleUpload() {
         <p class="info">📚 Subject: ${result.subject}</p>
         <p class="info">🎓 Year: ${result.year}</p>
         <p class="info">🔗 URL: ${result.fileUrl}</p>
-        <p class="info">✨ The PDF is now available in the app!</p>
+        <p class="info">⏱️ Please wait up to 1 minute for the PDF to appear on the website.</p>
+        <p class="info">💡 GitHub Pages is rebuilding with your new PDF...</p>
       `;
       
       // Clear form
