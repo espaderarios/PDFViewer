@@ -67,6 +67,14 @@ async function handleGetPDFsByYear(env, year, corsHeaders) {
 
 async function handleUpload(request, env, corsHeaders) {
   try {
+    // Check if GitHub token exists
+    if (!env.GITHUB_TOKEN) {
+      return new Response(JSON.stringify({ error: 'GitHub token not configured. Run: wrangler secret put GITHUB_TOKEN' }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
+
     const formData = await request.formData();
     const title = formData.get('title');
     const subject = formData.get('subject');
@@ -85,7 +93,7 @@ async function handleUpload(request, env, corsHeaders) {
     const fileBase64 = arrayBufferToBase64(fileBuffer);
 
     // Commit to GitHub using GitHub API
-    const githubToken = env.GITHUB_TOKEN; // You'll need to set this as a secret
+    const githubToken = env.GITHUB_TOKEN;
     const repo = 'espaderarios/PDFViewer'; // Your repo
     const filePath = `pdfs/${fileName}`;
 
@@ -105,7 +113,10 @@ async function handleUpload(request, env, corsHeaders) {
 
     if (!githubResponse.ok) {
       const errorData = await githubResponse.text();
-      throw new Error(`GitHub API error: ${githubResponse.status} - ${errorData}`);
+      return new Response(JSON.stringify({ error: `GitHub API error: ${githubResponse.status}`, details: errorData }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
     }
 
     // Add to D1 database
@@ -128,7 +139,8 @@ async function handleUpload(request, env, corsHeaders) {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
   } catch (error) {
-    return new Response(JSON.stringify({ error: error.message }), {
+    console.error('Upload error:', error);
+    return new Response(JSON.stringify({ error: error.message, stack: error.stack }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
