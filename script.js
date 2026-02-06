@@ -180,23 +180,44 @@ async function handleUpload() {
   uploadBtn.disabled = true;
 
   try {
-    // Since we're using local storage without R2, show instructions
-    const fileName = file.name.replace(/'/g, "''");
-    const titleEscaped = title.replace(/'/g, "''");
-    const subjectEscaped = subject.replace(/'/g, "''");
-    const yearEscaped = year.replace(/'/g, "''");
-    
-    uploadStatus.innerHTML = `
-      <div class="upload-instructions">
-        <p class="success">✅ PDF ready to upload</p>
-        <p><strong>To complete the upload, run this command in PowerShell:</strong></p>
-        <pre>.\\add-pdf-local.ps1 -File "${file.name}" -Title "${titleEscaped}" -Subject "${subjectEscaped}" -Year "${yearEscaped}"</pre>
-        <p class="info">📝 Make sure the PDF file is in your Downloads folder or update the path accordingly.</p>
-        <p class="info">🚀 After running the command, deploy with: <code>wrangler pages deploy . --project-name=pdf-viewer</code></p>
-      </div>
-    `;
+    // Create form data
+    const formData = new FormData();
+    formData.append('title', title);
+    formData.append('subject', subject);
+    formData.append('year', year);
+    formData.append('file', file);
+
+    // Upload to local server
+    const response = await fetch('http://localhost:3001/upload', {
+      method: 'POST',
+      body: formData
+    });
+
+    const result = await response.json();
+
+    if (response.ok) {
+      uploadStatus.innerHTML = `
+        <p class="success">✅ PDF uploaded successfully!</p>
+        <p class="info">📋 Title: ${result.title}</p>
+        <p class="info">📚 Subject: ${result.subject}</p>
+        <p class="info">🎓 Year: ${result.year}</p>
+        <p class="info">🔗 URL: ${result.fileUrl}</p>
+        <p class="info">✨ The PDF is now available in the app!</p>
+      `;
+      
+      // Clear form
+      document.getElementById('pdfTitle').value = '';
+      document.getElementById('pdfSubject').value = '';
+      document.getElementById('pdfYear').value = '';
+      document.getElementById('pdfFile').value = '';
+      
+      // Reload years to show the new PDF
+      await loadYears();
+    } else {
+      uploadStatus.innerHTML = `<p class="error">❌ Upload failed: ${result.error}</p>`;
+    }
   } catch (error) {
-    uploadStatus.innerHTML = `<p class="error">❌ Error: ${error.message}</p>`;
+    uploadStatus.innerHTML = `<p class="error">❌ Error: ${error.message}<br><br>Make sure the upload server is running: <code>node upload-server.js</code></p>`;
   } finally {
     uploadBtn.disabled = false;
   }
